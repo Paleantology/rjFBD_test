@@ -1,0 +1,53 @@
+#dataFolder <- "data/representative/Mu4/20/"
+
+base_folder <- "/Volumes/FLASHDEVICE/Wright-Data"
+
+#"/Users/elijahphifer/Documents/lab_work"
+
+#"~/sampledAncestors/scripts/functions/Simulations"
+
+######################
+# Species-Tree model #
+######################
+
+
+nTips = v(10, 25, 50)
+Mu = v(1, 2, 3, 4)
+
+for(tip in nTips){
+
+  for(mu in Mu){
+  
+    for(j in 1:100){
+    
+      curr_tree_base <- base_folder + "/MU_" + tip + "_" + mu + "/" + j 
+      
+      curr_tree <- curr_tree_base + "/" + "tree_" + j + ".nex"
+      
+      #"data/representative/Mu4/20.nex"
+    
+      starting_tree <- readBranchLengthTrees(curr_tree)[1] 
+      taxa <- starting_tree.taxa()
+
+      n_branches <- 2 * taxa.size()- 3 # number of branches in a rooted tree
+      n_sites <- taxa.size()*3
+      
+      Q <- fnJC(2)
+      
+       alpha_morpho ~ dnExponential( 1.0 )
+       rates_morpho := fnDiscretizeGamma( alpha_morpho, alpha_morpho, 4 )
+      
+      reps <- 100
+      for (i in 1:reps)
+      {
+      seq ~ dnPhyloCTMC(tree=starting_tree, siteRates=rates_morpho, Q=Q, type="Standard",  nSites=n_sites)
+      name <- curr_tree_base + "/mat" + "/char_matrix_" + i + ".nex"
+      writeNexus(filename=name, seq)
+      seq.redraw()
+      }
+          
+    
+    }
+  }
+}
+
