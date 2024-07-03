@@ -17,7 +17,8 @@ for (i in 1:n_max_states) {
         m_morph[idx] ~ dnPhyloCTMC( tree=fbd_tree,
                                     Q=q[idx],
                                     nSites=nc,
-                                    siteRates=site_rates,
+                                    siteRates=rates_morpho,
+                                    branchRates = clock_morpho,
                                     type="Standard")
 
         # attach the data

@@ -1,7 +1,7 @@
-root="~/rjFBD_test"
+root="/Users/elijahphifer/Desktop/rjFBD_test"
 base="${root}/data/Latest_sim_data"
-data="${base}/data"
-scripts="${base}/scripts"
+data="${root}/data"
+scripts="${root}/scripts"
 
 nTips=(10 10 10 10 25 25 25 25 50 50 50 50)
 Mu=(1 2 3 4 1 2 3 4 1 2 3 4)
@@ -26,7 +26,7 @@ for tree in $trees; do
     tree_dir="${my_dir}/${tree}"
     mat_dir="${tree_dir}/mat"
     mat1="${mat_dir}/1"
-    mat1="${mat_dir}/2"
+    mat2="${mat_dir}/2"
     #file="${tree_dir}/tree_${tree}.nex.csv"
     
     foss1="${mat_dir}/tree1_${tree}.nex.csv"
@@ -34,7 +34,7 @@ for tree in $trees; do
     
     cp ${foss1} ${common}/data_file.csv
 
-    find "$mat1" -name '*.nex' | while read matrix
+    for matrix in mat1/*.nex
         do
         #cd ${mat_dir}
         cp $matrix ${common}/matrix.nex
@@ -50,7 +50,7 @@ for tree in $trees; do
     
     cp ${foss2} ${common}/data_file.csv
 
-    find "$mat2" -name '*.nex' | while read matrix
+    for matrix in mat2/*.nex
         do
         #cd ${mat_dir}
         cp $matrix ${common}/matrix.nex
