@@ -1,7 +1,10 @@
 
-taxa <- readTaxonData("data/rjSim/MU_10_1/1/mat/tree1_1.nex.csv", separator = ",")
+#root <- "~/rjFBD_test/data/Latest_sim_data"
+
+
+taxa <- readTaxonData("~/rjFBD_test/data/Latest_sim_data/common_place/tree.csv", separator = ",")
 taxa
-morpho <- readDiscreteCharacterData("data/rjSim/MU_10_1/1/1.nex")
+morpho <- readDiscreteCharacterData("~/rjFBD_test/data/Latest_sim_data/common_place/matrix.nex")
 morpho.addMissingTaxa(taxa)
 moves = VectorMoves()
 monitors = VectorMonitors()
