@@ -8,7 +8,7 @@ Mu=(1 2 3 4 1 2 3 4 1 2 3 4)
 trees=$(seq 1 100)
 psi=(1 2)
 mats=$(seq 1 100)
-
+#slfkjsda
 #make a folder for a common place to accsess files
 common="${base}/common_place"
 
