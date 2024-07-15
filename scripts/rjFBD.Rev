@@ -1,7 +1,10 @@
 
-taxa <- readTaxonData("data/rjSim/MU_10_1/1/mat/tree1_1.nex.csv", separator = ",")
+#root <- "~/rjFBD_test/data/Latest_sim_data"
+
+
+taxa <- readTaxonData("/Users/elijahphifer/Desktop/rjFBD_test/data/Latest_sim_data/common_place/data_file.csv", separator = ",")
 taxa
-morpho <- readDiscreteCharacterData("data/rjSim/MU_10_1/1/1.nex")
+morpho <- readDiscreteCharacterData("/Users/elijahphifer/Desktop/rjFBD_test/data/Latest_sim_data/common_place/matrix.nex")
 morpho.addMissingTaxa(taxa)
 moves = VectorMoves()
 monitors = VectorMonitors()
@@ -86,10 +89,12 @@ moves.append(mvScale(alpha_morpho, lambda=1, weight=2.0))
 source("scripts/model_Mk.Rev")
 
      mymodel = model(fbd_tree)
+     
+     monitors = VectorMonitors()
 
 
 
-     monitors.append(mnModel(filename="output/low.log", printgen=100))
+     monitors.append(mnModel(filename="output/low.log", printgen=100, exclude = v("times")))
 
 
 
@@ -104,7 +109,7 @@ source("scripts/model_Mk.Rev")
      mymcmc = mcmc(mymodel, monitors, moves, nrun=2)
 
 
-     mymcmc.run(generations=100000000)
+     mymcmc.run(generations= 50000)
 
 
 
