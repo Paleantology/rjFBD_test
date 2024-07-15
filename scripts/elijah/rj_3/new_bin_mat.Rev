@@ -1,0 +1,31 @@
+dataFolder <- "/Users/elijahphifer/Desktop/rjFBD_test/scripts/elijah/rj_3/data"
+
+file <- dataFolder + "/input/input.nex"
+
+
+
+######################
+# Species-Tree model #
+######################
+
+starting_tree <- readBranchLengthTrees(file)[1]
+taxa <- starting_tree.taxa()
+
+n_branches <- 2 * taxa.size()- 3 # number of branches in a rooted tree
+n_sites <- taxa.size()*3
+
+Q <- fnJC(2)
+
+ alpha_morpho ~ dnExponential( 1.0 )
+ rates_morpho := fnDiscretizeGamma( alpha_morpho, alpha_morpho, 4 )
+
+reps <- 100
+for (i in 1:reps)
+{
+seq ~ dnPhyloCTMC(tree=starting_tree, siteRates=rates_morpho, Q=Q, type="Standard",  nSites=n_sites)
+name <- dataFolder +"/out" + "/output_" + i + ".nex"
+writeNexus(filename=name, seq)
+seq.redraw()
+}
+
+q()

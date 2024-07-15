@@ -1,0 +1,120 @@
+
+#root <- "~/rjFBD_test/data/Latest_sim_data"
+output_f <- "/Users/elijahphifer/Desktop/rjFBD_test/scripts/elijah/rj_3/data/output"
+
+taxa <- readTaxonData("/Users/elijahphifer/Desktop/rjFBD_test/scripts/elijah/rj_3/data/common_place/data_file.csv", separator = ",")
+taxa
+morpho <- readDiscreteCharacterData("/Users/elijahphifer/Desktop/rjFBD_test/scripts/elijah/rj_3/data/common_place/matrix.nex")
+morpho.addMissingTaxa(taxa)
+moves = VectorMoves()
+monitors = VectorMonitors()
+
+n_taxa <- taxa.size()
+
+#
+
+num_branches <- 2 * n_taxa - 2
+
+timeline <- v(10.1);
+# Shifts after Mass Extinctions
+timeline1 <- v(5.05, 10.1);  # Shifts after Devonian & Ordovician
+# Shifts after Mass Extinctions & Separate Mass Extinction Interval Rates
+
+
+
+fbd_indicator ~ dnCategorical(simplex(1,1));
+fbd_indicator.setValue(2);
+moves.append( mvRandomGeometricWalk(fbd_indicator, weight=10.0, tune=FALSE) );
+fbd_vec := v(timeline, timeline1);
+times := fbd_vec[fbd_indicator]
+times.size()
+source("scripts/model_FBD.Rev")
+
+fbd_dist = dnFBDP(originAge=origin_time, lambda=speciation_rate, mu=extinction_rate, psi=psi, rho=rho, timeline=times, taxa=morpho.taxa(), condition="sampling")
+
+fbd_tree ~ dnConstrainedTopology(fbd_dist)
+
+
+
+
+     fbd_tree ~ dnConstrainedTopology(fbd_dist)
+
+
+     moves.append(mvFNPR(fbd_tree, weight=15.0))
+
+     moves.append(mvCollapseExpandFossilBranch(fbd_tree, origin_time, weight=6.0))
+
+     moves.append(mvNodeTimeSlideUniform(fbd_tree, weight=40.0))
+
+     moves.append(mvRootTimeSlideUniform(fbd_tree, origin_time, weight=5.0))
+
+
+
+
+
+ # Setup the fossil tip sampling #
+
+ # Use a for loop to create a uniform distribution on the occurence time for each fossil #
+
+ # The boundaries of the uniform distribution are specified in the tsv file #
+
+ fossils = taxa
+ for(i in 1:fossils.size())
+{
+    fossils[i]
+    t[i] := tmrca(fbd_tree, clade(fossils[i]))
+    a_i = fossils[i].getMinAge()
+    b_i = fossils[i].getMaxAge()
+ #   F[i] ~ dnUniform(t[i] - b_i, t[i] - a_i)
+ #  F[i].clamp( 0 )
+}
+
+ # Add a move to sample the fossil times #
+ moves.append( mvFossilTimeSlideUniform(fbd_tree, origin_time, weight=5.0) )
+
+
+num_samp_anc := fbd_tree.numSampledAncestors()
+
+
+clock_morpho ~ dnExponential(1.0)
+
+moves.append( mvScale(clock_morpho, lambda=0.01, weight=4.0) )
+moves.append( mvScale(clock_morpho, lambda=0.1,  weight=4.0) )
+moves.append( mvScale(clock_morpho, lambda=1,    weight=4.0) )
+
+
+alpha_morpho ~ dnUniform( 0, 1E6 )
+rates_morpho := fnDiscretizeGamma( alpha_morpho, alpha_morpho, 4 )
+#Moves on the parameters of the Gamma distribution.
+moves.append(mvScale(alpha_morpho, lambda=1, weight=2.0))
+
+source("scripts/model_Mk.Rev")
+
+     mymodel = model(fbd_tree)
+     
+     monitors = VectorMonitors()
+
+    log_log <- output_f + "/low.log"
+    
+    tre_tre <- output_f + "/low.trees"
+
+     monitors.append(mnModel(filename=log_log, printgen=100, exclude = v("times")))
+
+
+
+     monitors.append(mnFile(filename=tre_tre, printgen=100,  fbd_tree))
+
+
+
+     monitors.append(mnScreen(printgen=100, num_samp_anc, origin_time, fbd_indicator))
+
+
+
+     mymcmc = mcmc(mymodel, monitors, moves, nrun=2)
+
+
+     mymcmc.run(generations= 50000)
+
+
+
+     q()

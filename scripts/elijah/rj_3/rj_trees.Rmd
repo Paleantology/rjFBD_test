@@ -1,0 +1,107 @@
+---
+title: "rj_trees.Rmd"
+author: "Elijah Phifer"
+date: "2024-07-12"
+output: html_document
+---
+
+```{r}
+
+library(FossilSim)
+library(ape)
+library(readr)
+library(tidyverse)
+
+
+my_dir_base <- "/Users/elijahphifer/Desktop/rjFBD_test/scripts/elijah/rj_3/data"
+
+binaryMat <- "/Users/elijahphifer/Desktop/rjFBD_test/scripts/elijah/rj_3/new_bin_mat.Rev"
+
+rb <- "/Users/elijahphifer/Downloads/revbayes-v1.2.4 2/bin/rb"
+
+input <- paste0(my_dir_base, "/input")
+if (!dir.exists(input)) {
+  dir.create(input)
+}
+
+out <- paste0(my_dir_base, "/out")
+if (!dir.exists(out)) {
+  dir.create(out)
+}
+
+my_dir <- paste0(my_dir_base, "/" ,n, "_", m)
+
+if (!dir.exists(my_dir)) {
+  dir.create(my_dir)
+}
+```
+
+```{r}
+
+for(i in 1:num_trees){
+  tree_dir <- paste0(my_dir, "/", i)
+  if (!dir.exists(tree_dir)) {
+    dir.create(tree_dir)
+  }
+  mat_dir <- paste0(tree_dir, "/mat")
+  if (!dir.exists(mat_dir)) {
+    dir.create(mat_dir)
+  }
+  
+  rate <- 2
+  n <- 22
+  num_trees <- 1000
+  
+  lamda <- c(1.204,1.204, 0.594, 0.658)
+  mu <- c(2.28, 2.28, 0.845, 0.824) 
+  psi <- c(0.388, 0.388, 0.137, 0.217)
+  times <- c(497, 500, 503.5, 508)
+  
+  trees <- sim.fbd.rateshift.taxa(n=n, numbsim = 1, lambda = lamda, mu = mu, psi = psi, times = times)
+
+  tree <- trees[[1]]
+  
+  f = sim.fossils.poisson(rate = rate, tree = tree)
+  SAtre <- SAtree.from.fossils(tree = tree, fossils = f)$tree
+  tre <- paste0("/tree_", i, ".nex")
+  tree_nex <- paste0(tree_dir, tre)
+  write.nexus(SAtre, file = tree_nex)
+  write.nexus(SAtre, file = paste0(input, "/input.nex"))
+  
+  
+  my_csv_file <- paste0(mat_dir, "/", tre, ".csv")
+  
+  
+  write.table(f, my_csv_file, append = TRUE, sep = ",", row.names = FALSE,col.names = FALSE, quote = FALSE)
+  
+  data <- read_csv(my_csv_file, col_names = FALSE)
+    
+    # Rename the columns
+  names(data) <- c("taxon", "taxon2", "min_age", "max_age")
+    
+    # Drop the unnecessary column
+  data$taxon2 <- NULL
+    
+    # Write the modified data to a new CSV file
+  write.table(data, my_csv_file, sep = ",", row.names = FALSE, quote = FALSE)
+
+  
+  system2(rb, args = binaryMat)
+  
+  for(j in 1:100){
+      #file.rename("path/to/old_file_name", "path/to/new_file_name")
+    system2("cp", args = c(paste0(out, "/output_", j, ".nex"), paste0(mat_dir, "/matrix_", j, ".nex")))
+  }
+}
+
+
+
+
+
+
+
+
+
+
+#  trees1 <- sim.fbd.rateshift.taxa(n = n, numbsim = 100, lambda = c(lam, (lam*2)), mu = c(mu, (mu*2)), psi = c(0.1, 0.1), times = c((tr_age/2), tr_age))
+```
